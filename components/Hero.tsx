@@ -41,25 +41,14 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
         </div>
       </div>
       
-      <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-slate-50">
-        <div className="h-56 w-full sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center p-10">
-           {/* Abstract UI representation */}
-           <div className="w-full max-w-md aspect-square bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl rotate-3 opacity-90 relative transform hover:rotate-0 transition-transform duration-500">
-              <div className="absolute inset-2 bg-white rounded-xl shadow-inner overflow-hidden p-4 grid grid-cols-2 gap-4 opacity-95">
-                 <div className="col-span-2 h-8 bg-slate-100 rounded-lg"></div>
-                 <div className="h-24 bg-blue-50 rounded-lg"></div>
-                 <div className="h-24 bg-purple-50 rounded-lg"></div>
-                 <div className="col-span-2 h-32 bg-slate-50 rounded-lg mt-2"></div>
-              </div>
-              {/* Floating Badge */}
-              <div className="absolute -left-8 bottom-12 bg-white p-4 rounded-lg shadow-xl flex items-center gap-3 animate-bounce">
-                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">¥</div>
-                 <div>
-                   <p className="text-xs text-slate-500">本月营收预估</p>
-                   <p className="font-bold text-slate-900">+128.5%</p>
-                 </div>
-              </div>
-           </div>
+      <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+        <div className="h-56 w-full sm:h-72 md:h-96 lg:w-full lg:h-full relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/20 to-transparent z-10 lg:via-white/0"></div>
+          <img
+            className="h-full w-full object-cover"
+            src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+            alt="Enterprise ERP Dashboard"
+          />
         </div>
       </div>
     </section>

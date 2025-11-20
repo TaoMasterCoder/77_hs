@@ -188,7 +188,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "移动端现场管理，随时随地协同办公",
             "项目利润实时测算，风险自动预警"
           ]}
-          imageSrc="https://images.unsplash.com/photo-1531403009284-440f080d1e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          imageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
         />
 
         <FeatureBlock 
@@ -217,7 +217,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "信用支付集成，对公支付一键直达",
             "差旅预订平台对接，无需垫资"
           ]}
-          imageSrc="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+          imageSrc="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
         />
 
         <FeatureBlock 

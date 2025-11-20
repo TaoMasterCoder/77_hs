@@ -120,8 +120,18 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
       // Send the user message and await response (potentially with function calls)
       let result = await chatSession.sendMessage({ message: userText });
 
+      let loopCount = 0;
+      const MAX_LOOPS = 5; // Safety guard against infinite loops
+
       // Loop to handle function calls if the model requests them
       while (result.functionCalls && result.functionCalls.length > 0) {
+         loopCount++;
+         if (loopCount > MAX_LOOPS) {
+           console.warn("AI loop limit exceeded");
+           setMessages(prev => [...prev, { role: 'model', text: '系统繁忙，请稍后重试。' }]);
+           break;
+         }
+
          const functionResponses: any[] = [];
 
          for (const call of result.functionCalls) {
@@ -267,7 +277,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder={isThinking ? "请稍候..." : "记一笔 500元的服务器费用..."}
-                className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl text-sm outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl text-sm outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={isThinking}
               />
               <Button 
