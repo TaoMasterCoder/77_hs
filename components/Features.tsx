@@ -18,9 +18,10 @@ interface FeatureBlockProps {
   points: string[];
   isReversed?: boolean;
   colorClass: string;
+  imageSrc: string;
 }
 
-const FeatureBlock: React.FC<FeatureBlockProps> = ({ title, description, icon, points, isReversed, colorClass }) => {
+const FeatureBlock: React.FC<FeatureBlockProps> = ({ title, description, icon, points, isReversed, colorClass, imageSrc }) => {
   return (
     <div className={`flex flex-col md:flex-row items-center gap-12 py-16 ${isReversed ? 'md:flex-row-reverse' : ''}`}>
       <div className="flex-1">
@@ -41,28 +42,16 @@ const FeatureBlock: React.FC<FeatureBlockProps> = ({ title, description, icon, p
         </ul>
       </div>
       <div className="flex-1 w-full">
-        <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100 shadow-lg relative overflow-hidden aspect-video flex items-center justify-center">
-           {/* Abstract UI representation for feature */}
-           <div className="w-full h-full bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex flex-col gap-3 relative z-10">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-                 <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                 <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                 <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                 <div className="ml-auto w-20 h-2 bg-slate-100 rounded-full"></div>
-              </div>
-              <div className="flex gap-4 h-full overflow-hidden">
-                 <div className="w-1/4 bg-slate-50 rounded h-full"></div>
-                 <div className="flex-1 flex flex-col gap-2">
-                    <div className="h-8 bg-blue-50 rounded w-1/3"></div>
-                    <div className="h-32 bg-slate-50 rounded w-full"></div>
-                    <div className="flex gap-2 mt-auto">
-                       <div className="h-12 bg-slate-50 rounded flex-1"></div>
-                       <div className="h-12 bg-slate-50 rounded flex-1"></div>
-                    </div>
-                 </div>
-              </div>
-           </div>
-           <div className={`absolute -bottom-6 -right-6 w-32 h-32 rounded-full opacity-20 ${colorClass.replace('text', 'bg').split(' ')[0]}`}></div>
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 relative overflow-hidden aspect-video flex items-center justify-center group cursor-pointer">
+           <div className="absolute inset-0 bg-slate-200 animate-pulse"></div>
+           <img 
+              src={imageSrc} 
+              alt={title}
+              className="relative z-10 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+           />
+           {/* Subtle overlay to ensure image doesn't clash too much with bright backgrounds */}
+           <div className="absolute inset-0 bg-black/5 z-20 group-hover:bg-transparent transition-colors duration-500"></div>
         </div>
       </div>
     </div>
@@ -199,6 +188,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "移动端现场管理，随时随地协同办公",
             "项目利润实时测算，风险自动预警"
           ]}
+          imageSrc="https://images.unsplash.com/photo-1531403009284-440f080d1e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
         />
 
         <FeatureBlock 
@@ -213,6 +203,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "银企直联，资金流水自动对账",
             "实时利润表/资产负债表，决策快人一步"
           ]}
+          imageSrc="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
         />
 
         <FeatureBlock 
@@ -226,6 +217,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "信用支付集成，对公支付一键直达",
             "差旅预订平台对接，无需垫资"
           ]}
+          imageSrc="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
         />
 
         <FeatureBlock 
@@ -240,6 +232,7 @@ export const Features: React.FC<{ onStart: () => void }> = ({ onStart }) => {
             "企业级安全防护，数据加密存储",
             "全功能移动端 App，不仅仅是审批"
           ]}
+          imageSrc="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
         />
       </div>
       

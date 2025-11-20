@@ -23,6 +23,7 @@ import { RESOURCE_PRICING, EXCHANGE_RATE_USD_TO_CNY } from '../constants';
 import { PricingCalculator } from './PricingCalculator';
 import { Button } from './Button';
 import { HelpCenter } from './HelpCenter';
+import { AIAssistant } from './AIAssistant';
 
 export const Dashboard: React.FC = () => {
   // Simulated User State
@@ -138,6 +139,23 @@ export const Dashboard: React.FC = () => {
     };
     
     return newTransaction;
+  };
+
+  // AI Handler to inject transactions safely
+  const handleAITransaction = (amount: number, description: string, type: Transaction['type']) => {
+    const tx = addTransaction(amount, description, type);
+    
+    setUserState(prev => ({
+      ...prev,
+      balance: prev.balance + tx.baseAmount,
+      transactions: [tx, ...prev.transactions]
+    }));
+    
+    // Show toast for feedback
+    setToast({ 
+      message: `AI助手: ${type === 'recharge' ? '充值' : '消费'}成功 ${formatMoney(tx.baseAmount)}`, 
+      type: 'success' 
+    });
   };
 
   const handleRecharge = () => {
@@ -642,6 +660,12 @@ export const Dashboard: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* AI Assistant Floating Widget */}
+      <AIAssistant 
+        userState={userState} 
+        onAddTransaction={handleAITransaction} 
+      />
 
       {/* Recharge Modal */}
       {showRechargeModal && (
