@@ -23,51 +23,26 @@ import { RESOURCE_PRICING, EXCHANGE_RATE_USD_TO_CNY } from '../constants';
 import { PricingCalculator } from './PricingCalculator';
 import { Button } from './Button';
 import { HelpCenter } from './HelpCenter';
-import { AIAssistant } from './AIAssistant';
+// AIAssistant is now global in App.tsx
 
-export const Dashboard: React.FC = () => {
-  // Simulated User State
-  const [userState, setUserState] = useState<UserState>(() => {
-    const saved = localStorage.getItem('qiqi_user_state');
-    const defaultState: UserState = {
-      balance: 0,
-      displayCurrency: 'CNY',
-      isSubscribed: false,
-      activePlan: null,
-      userCount: 0,
-      storageGB: 5, // Free tier
-      tokensUsed: 0,
-      expiryDate: null,
-      transactions: []
-    };
+interface DashboardProps {
+  userState: UserState;
+  setUserState: React.Dispatch<React.SetStateAction<UserState>>;
+}
 
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Migration checks
-      if (!parsed.transactions) parsed.transactions = [];
-      if (!parsed.displayCurrency) parsed.displayCurrency = 'CNY';
-      return parsed;
-    }
-    return defaultState;
-  });
-
+export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState }) => {
   const [view, setView] = useState<'overview' | 'subscribe' | 'resources' | 'history' | 'help'>('overview');
   const [rechargeAmount, setRechargeAmount] = useState<number | ''>('');
   const [rechargeCurrency, setRechargeCurrency] = useState<Currency>('CNY');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'warning'} | null>(null);
   
-  // Persist state
-  useEffect(() => {
-    localStorage.setItem('qiqi_user_state', JSON.stringify(userState));
-  }, [userState]);
-
   // Auto-dismiss toast
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => {
         setToast(null);
-      }, 4000); // Extended slightly for readability
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -84,8 +59,6 @@ export const Dashboard: React.FC = () => {
       const diffTime = expiry.getTime() - now.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Only show notification if it hasn't been shown in this session (in a real app, use session storage or dismissed state)
-      // For this demo, we show it on mount/update if conditions are met.
       if (diffDays > 0) {
         if (diffDays <= 7) {
           setToast({
@@ -139,23 +112,6 @@ export const Dashboard: React.FC = () => {
     };
     
     return newTransaction;
-  };
-
-  // AI Handler to inject transactions safely
-  const handleAITransaction = (amount: number, description: string, type: Transaction['type']) => {
-    const tx = addTransaction(amount, description, type);
-    
-    setUserState(prev => ({
-      ...prev,
-      balance: prev.balance + tx.baseAmount,
-      transactions: [tx, ...prev.transactions]
-    }));
-    
-    // Show toast for feedback
-    setToast({ 
-      message: `AI助手: ${type === 'recharge' ? '充值' : '消费'}成功 ${formatMoney(tx.baseAmount)}`, 
-      type: 'success' 
-    });
   };
 
   const handleRecharge = () => {
@@ -660,12 +616,6 @@ export const Dashboard: React.FC = () => {
           </main>
         </div>
       </div>
-
-      {/* AI Assistant Floating Widget */}
-      <AIAssistant 
-        userState={userState} 
-        onAddTransaction={handleAITransaction} 
-      />
 
       {/* Recharge Modal */}
       {showRechargeModal && (

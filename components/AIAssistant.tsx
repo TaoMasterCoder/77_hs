@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { Send, X, Sparkles, Bot, Loader2 } from 'lucide-react';
 import { UserState, Transaction } from '../types';
 import { Button } from './Button';
@@ -16,6 +16,7 @@ interface ChatMessage {
 
 export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransaction }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', text: '你好！我是企企智能助手。您可以让我帮您记账（如"充值1000元"、"购买服务器花费500元"），或者询问当前的财务状况。' }
@@ -34,12 +35,23 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (isOpen) {
+      scrollToBottom();
+      setShowTooltip(false);
+    }
   }, [messages, isOpen, isThinking]);
+
+  // Auto-hide tooltip after 8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // --- Tool Definitions ---
 
-  const addTransactionTool = {
+  const addTransactionTool: FunctionDeclaration = {
     name: 'addTransaction',
     description: 'Record a new financial transaction. Execute this whenever the user wants to add income, expenses, buy resources, or recharge.',
     parameters: {
@@ -63,7 +75,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
     },
   };
 
-  const getFinancialDataTool = {
+  const getFinancialDataTool: FunctionDeclaration = {
     name: 'getFinancialData',
     description: 'Get current financial status (balance, recent transactions, subscription). Use this to answer questions about the user\'s account.',
     parameters: {
@@ -200,11 +212,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+    <div className="fixed bottom-8 right-8 z-[999] flex flex-col items-end gap-4 pointer-events-none">
       
       {/* Chat Window */}
-      {isOpen && (
-        <div className={`bg-white w-[340px] md:w-[380px] h-[550px] rounded-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-200 transition-all duration-300 ${isThinking ? 'shadow-blue-300/50 ring-2 ring-blue-400 border-transparent' : 'shadow-2xl border border-slate-200 ring-1 ring-slate-900/5'}`}>
+      <div className={`pointer-events-auto transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 absolute bottom-0 right-0'}`}>
+        <div className={`bg-white w-[340px] md:w-[380px] h-[550px] rounded-2xl flex flex-col overflow-hidden ${isThinking ? 'shadow-blue-300/50 ring-2 ring-blue-400 border-transparent' : 'shadow-2xl border border-slate-200 ring-1 ring-slate-900/5'}`}>
           {/* Header */}
           <div className={`p-4 flex justify-between items-center text-white shadow-md z-10 transition-all duration-500 relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600`}>
             {/* Subtle gradient animation overlay */}
@@ -291,15 +303,26 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ userState, onAddTransa
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Tooltip Bubble */}
+      {!isOpen && showTooltip && (
+        <div className="pointer-events-auto animate-in fade-in slide-in-from-right-4 duration-500 absolute bottom-20 right-0 mr-2 w-48">
+          <div className="bg-white p-3 rounded-xl rounded-tr-none shadow-xl border border-blue-100 text-sm text-slate-600 relative">
+             <p>👋 嗨！我是您的智能助手。点击这里，我可以帮您记账或查询报表。</p>
+             <div className="absolute -bottom-2 right-0 w-4 h-4 bg-white border-b border-r border-blue-100 transform rotate-45 translate-x-[-14px] translate-y-[-10px]"></div>
+             <button onClick={() => setShowTooltip(false)} className="absolute top-1 right-1 text-slate-400 hover:text-slate-600"><X size={12} /></button>
+          </div>
+        </div>
       )}
 
       {/* Toggle Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 z-50 ${
+        className={`pointer-events-auto h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 ${
           isOpen 
           ? 'bg-slate-700 text-white rotate-90 scale-90' 
-          : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:scale-110 hover:shadow-blue-600/40 animate-bounce'
+          : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:scale-110 hover:shadow-blue-600/40 hover:rotate-12'
         }`}
       >
         {isOpen ? <X size={24} /> : <Bot size={28} />}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, Cloud } from 'lucide-react';
 import { Button } from './Button';
 
@@ -10,26 +10,57 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const isHome = currentPage === 'home';
+
+  // Determine text colors based on page and scroll state
+  // On Home: Transparent bg with White text initially, then White bg with Black text on scroll
+  // Other pages: Always White bg with Black text
+  const navBgClass = isHome && !scrolled 
+    ? 'bg-transparent border-transparent' 
+    : 'bg-white/90 backdrop-blur-md border-slate-200 shadow-sm';
+    
+  const textColorClass = isHome && !scrolled 
+    ? 'text-white/90 hover:text-white' 
+    : 'text-slate-600 hover:text-blue-600';
+    
+  const activeColorClass = isHome && !scrolled
+    ? 'text-white font-bold'
+    : 'text-blue-600 font-bold';
+
+  const logoColorClass = isHome && !scrolled ? 'text-white' : 'text-slate-900';
+  const buttonVariant = isHome && !scrolled ? 'outline' : 'primary';
+  const buttonClass = isHome && !scrolled 
+    ? 'border-white/20 text-white hover:bg-white/10' 
+    : '';
 
   const getLinkClass = (page: PageType) => {
     const base = "text-sm font-medium transition-colors";
-    return currentPage === page 
-      ? "text-blue-600 font-semibold" 
-      : "text-slate-600 hover:text-blue-600";
+    return currentPage === page ? activeColorClass : textColorClass;
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
+    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 border-b ${navBgClass}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => onNavigate('home')}>
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-lg transition-colors ${isHome && !scrolled ? 'bg-white/10 text-white backdrop-blur-sm' : 'bg-blue-600 text-white'}`}>
               <Cloud size={24} fill="currentColor" />
             </div>
-            <span className="ml-3 text-xl font-bold text-slate-900 tracking-tight">
-              企企云服务<span className="text-blue-600">ERP</span>
+            <span className={`ml-3 text-xl font-bold tracking-tight transition-colors ${logoColorClass}`}>
+              企企云服务<span className={isHome && !scrolled ? 'text-blue-300' : 'text-blue-600'}>ERP</span>
             </span>
           </div>
 
@@ -44,26 +75,33 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
                   onNavigate('home'); 
                   setTimeout(() => document.getElementById('pricing')?.scrollIntoView({behavior:'smooth'}), 100);
                }
-            }} className="text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors">价格方案</a>
+            }} className={`${textColorClass} text-sm font-medium transition-colors`}>价格方案</a>
             
-            <div className="h-6 w-px bg-slate-300 mx-2"></div>
+            <div className={`h-6 w-px mx-2 ${isHome && !scrolled ? 'bg-white/20' : 'bg-slate-300'}`}></div>
             
             {currentPage === 'dashboard' ? (
                <div className="flex items-center gap-3">
-                  <span className="text-sm text-slate-500 font-medium">欢迎回来, 管理员</span>
-                  <Button variant="outline" size="sm" onClick={() => onNavigate('home')}>退出控制台</Button>
+                  <span className={`text-sm font-medium ${isHome && !scrolled ? 'text-white/80' : 'text-slate-500'}`}>欢迎回来, 管理员</span>
+                  <Button variant={isHome && !scrolled ? 'outline' : 'outline'} size="sm" onClick={() => onNavigate('home')} className={isHome && !scrolled ? 'border-white/30 text-white hover:bg-white/10' : ''}>退出控制台</Button>
                </div>
             ) : (
               <div className="flex items-center gap-3">
-                 <button onClick={() => onNavigate('dashboard')} className="text-slate-900 font-medium text-sm hover:text-blue-600">登录</button>
-                 <Button onClick={() => onNavigate('dashboard')} size="sm">免费试用 / 控制台</Button>
+                 <button onClick={() => onNavigate('dashboard')} className={`font-medium text-sm ${textColorClass}`}>登录</button>
+                 <Button 
+                    onClick={() => onNavigate('dashboard')} 
+                    size="sm" 
+                    variant={isHome && !scrolled ? 'outline' : 'primary'}
+                    className={buttonClass}
+                  >
+                    免费试用 / 控制台
+                 </Button>
               </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-slate-600 hover:text-slate-900 p-2">
+            <button onClick={() => setIsOpen(!isOpen)} className={`p-2 ${textColorClass}`}>
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
