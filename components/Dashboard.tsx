@@ -16,7 +16,12 @@ import {
   Search,
   Users,
   Calendar,
-  Globe
+  Globe,
+  CalendarDays,
+  Phone,
+  Mail,
+  Briefcase,
+  MoreHorizontal
 } from 'lucide-react';
 import { UserState, PlanType, Transaction, Currency } from '../types';
 import { RESOURCE_PRICING, EXCHANGE_RATE_USD_TO_CNY } from '../constants';
@@ -31,7 +36,7 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState }) => {
-  const [view, setView] = useState<'overview' | 'subscribe' | 'resources' | 'history' | 'help'>('overview');
+  const [view, setView] = useState<'overview' | 'subscribe' | 'resources' | 'history' | 'help' | 'appointments'>('overview');
   const [rechargeAmount, setRechargeAmount] = useState<number | ''>('');
   const [rechargeCurrency, setRechargeCurrency] = useState<Currency>('CNY');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
@@ -211,6 +216,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
     }));
   };
 
+  const toggleAppointmentStatus = (id: string) => {
+      setUserState(prev => ({
+          ...prev,
+          appointments: prev.appointments.map(a => 
+              a.id === id ? { ...a, status: a.status === 'pending' ? 'contacted' : 'pending' } : a
+          )
+      }));
+  };
+
   // Helper to get toast styles
   const getToastStyles = (type: 'success' | 'error' | 'warning') => {
     switch (type) {
@@ -303,6 +317,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
               >
                 <History size={18} />
                 交易记录
+              </button>
+              <button 
+                onClick={() => setView('appointments')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${view === 'appointments' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-white hover:text-blue-600'}`}
+              >
+                <CalendarDays size={18} />
+                预约管理
               </button>
                <button 
                 onClick={() => setView('help')}
@@ -461,153 +482,102 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
               </div>
             )}
 
-            {/* View: Subscribe */}
-            {view === 'subscribe' && (
+            {/* View: Appointments */}
+            {view === 'appointments' && (
               <div className="space-y-6">
                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-slate-900">订阅管理</h2>
-                    <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
-                      当前余额: {formatMoney(userState.balance)}
+                    <h2 className="text-2xl font-bold text-slate-900">预约管理</h2>
+                    <div className="flex gap-2">
+                       <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                          总预约: {userState.appointments ? userState.appointments.length : 0}
+                       </div>
+                       <div className="bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">
+                          待联系: {userState.appointments ? userState.appointments.filter(a => a.status === 'pending').length : 0}
+                       </div>
                     </div>
                  </div>
-                 <PricingCalculator 
-                   showSubscribeButton={true} 
-                   onSubscribe={handleSubscribe} 
-                   currency={userState.displayCurrency}
-                   exchangeRate={EXCHANGE_RATE_USD_TO_CNY}
-                 />
-              </div>
-            )}
 
-            {/* View: Resources */}
-            {view === 'resources' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-slate-900">资源扩展</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Storage Pack */}
-                  <div className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
-                        <Database size={24} />
-                      </div>
-                      <div>
-                         <h3 className="text-lg font-bold">存储加油包</h3>
-                         <p className="text-slate-500 text-sm">增加企业网盘容量</p>
-                      </div>
-                    </div>
-                    <div className="mb-6">
-                       <p className="text-2xl font-bold text-slate-900">
-                         {formatMoney(RESOURCE_PRICING.storagePerGBMonth * 12 * 10)} 
-                         <span className="text-sm text-slate-400 font-normal">/年</span>
-                       </p>
-                       <p className="text-sm text-slate-600 mt-1">增加 10GB 存储空间</p>
-                    </div>
-                    <Button variant="outline" className="w-full" onClick={handleBuyStorage}>购买 10GB (1年)</Button>
-                  </div>
-
-                  {/* Token Pack */}
-                  <div className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="p-3 bg-yellow-100 text-yellow-600 rounded-lg">
-                        <Zap size={24} />
-                      </div>
-                      <div>
-                         <h3 className="text-lg font-bold">AI Token 包</h3>
-                         <p className="text-slate-500 text-sm">用于 ERP 智能助手分析</p>
-                      </div>
-                    </div>
-                    <div className="mb-6">
-                       <p className="text-2xl font-bold text-slate-900">
-                         {formatMoney(RESOURCE_PRICING.tokensPerMillion)}
-                       </p>
-                       <p className="text-sm text-slate-600 mt-1">增加 100万 Token 额度</p>
-                    </div>
-                    <Button variant="outline" className="w-full" onClick={handleBuyTokens}>购买 100万 Token</Button>
-                  </div>
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="text-blue-600 mt-0.5" size={20} />
-                  <div className="text-sm text-blue-800">
-                    <p className="font-bold mb-1">计费说明</p>
-                    <p>所有资源扩展包即时生效。Token 为一次性消耗品，存储空间为年度订阅制。费用直接从账户余额扣除。</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* View: Transaction History */}
-            {view === 'history' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-slate-900">交易记录</h2>
-                  <div className="flex gap-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input type="text" placeholder="搜索交易..." className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  {userState.transactions.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm text-slate-600">
-                        <thead className="bg-slate-50 text-slate-900 font-medium border-b border-slate-200">
-                          <tr>
-                            <th className="px-6 py-4">时间</th>
-                            <th className="px-6 py-4">交易类型</th>
-                            <th className="px-6 py-4">详情</th>
-                            <th className="px-6 py-4 text-right">原币金额</th>
-                            <th className="px-6 py-4 text-right">入账金额 (CNY)</th>
-                            <th className="px-6 py-4 text-center">状态</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {userState.transactions.map((tx) => (
-                            <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                                {new Date(tx.date).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-2">
-                                  {tx.type === 'recharge' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">充值</span>}
-                                  {tx.type === 'subscription' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">订阅</span>}
-                                  {tx.type === 'resource' && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">资源</span>}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-slate-900 font-medium">
-                                {tx.description}
-                              </td>
-                              <td className={`px-6 py-4 text-right font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-slate-900'}`}>
-                                {tx.amount > 0 ? '+' : ''}
-                                {tx.currency === 'USD' ? '$' : '¥'}
-                                {Math.abs(tx.amount).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4 text-right text-slate-500">
-                                {tx.baseAmount > 0 ? '+' : ''}
-                                ¥{Math.abs(tx.baseAmount).toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className="text-green-600 flex items-center justify-center gap-1">
-                                  <CheckCircle2 size={14} /> 成功
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="p-12 text-center text-slate-400 flex flex-col items-center">
-                       <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                          <History size={32} className="opacity-50" />
+                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    {userState.appointments && userState.appointments.length > 0 ? (
+                       <div className="overflow-x-auto">
+                          <table className="w-full text-left text-sm text-slate-600">
+                             <thead className="bg-slate-50 text-slate-900 font-medium border-b border-slate-200">
+                                <tr>
+                                   <th className="px-6 py-4">提交时间</th>
+                                   <th className="px-6 py-4">姓名</th>
+                                   <th className="px-6 py-4">公司</th>
+                                   <th className="px-6 py-4">联系方式</th>
+                                   <th className="px-6 py-4">状态</th>
+                                   <th className="px-6 py-4 text-right">操作</th>
+                                </tr>
+                             </thead>
+                             <tbody className="divide-y divide-slate-100">
+                                {userState.appointments.map((appt) => (
+                                   <tr key={appt.id} className="hover:bg-slate-50 transition-colors">
+                                      <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                                         {new Date(appt.submittedAt).toLocaleString()}
+                                      </td>
+                                      <td className="px-6 py-4 font-medium text-slate-900">
+                                         {appt.name}
+                                      </td>
+                                      <td className="px-6 py-4 text-slate-600">
+                                         <div className="flex items-center gap-2">
+                                            <Briefcase size={14} className="text-slate-400" />
+                                            {appt.company}
+                                         </div>
+                                      </td>
+                                      <td className="px-6 py-4">
+                                         <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                               <Phone size={14} className="text-slate-400" />
+                                               {appt.phone}
+                                            </div>
+                                            {appt.email && (
+                                               <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                  <Mail size={14} />
+                                                  {appt.email}
+                                               </div>
+                                            )}
+                                         </div>
+                                      </td>
+                                      <td className="px-6 py-4">
+                                         {appt.status === 'pending' ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                                               <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+                                               待联系
+                                            </span>
+                                         ) : (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                               <CheckCircle2 size={12} />
+                                               已处理
+                                            </span>
+                                         )}
+                                      </td>
+                                      <td className="px-6 py-4 text-right">
+                                         <Button 
+                                            size="sm" 
+                                            variant="outline" 
+                                            className={`text-xs h-8 ${appt.status === 'pending' ? 'border-blue-200 text-blue-600 hover:bg-blue-50' : 'opacity-50'}`}
+                                            onClick={() => toggleAppointmentStatus(appt.id)}
+                                         >
+                                            {appt.status === 'pending' ? '标记为已联系' : '重置状态'}
+                                         </Button>
+                                      </td>
+                                   </tr>
+                                ))}
+                             </tbody>
+                          </table>
                        </div>
-                       <p>暂无交易记录</p>
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                       <div className="p-12 text-center text-slate-400 flex flex-col items-center">
+                          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                             <CalendarDays size={32} className="opacity-50" />
+                          </div>
+                          <p>暂无预约记录</p>
+                          <p className="text-xs mt-2 opacity-60">客户提交的演示预约将显示在这里</p>
+                       </div>
+                    )}
+                 </div>
               </div>
             )}
 

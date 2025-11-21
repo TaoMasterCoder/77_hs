@@ -13,7 +13,10 @@ import {
   X,
   BarChart,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  Zap,
+  Share2,
+  Cpu
 } from 'lucide-react';
 import { Button } from './Button';
 
@@ -24,6 +27,15 @@ const industries = [
   { id: 'tech', name: '软件信息', icon: <Users size={16} /> },
   { id: 'consulting', name: '咨询服务', icon: <Briefcase size={16} /> },
   { id: 'engineering', name: '工程设计', icon: <Layers size={16} /> },
+];
+
+const LOGO_WALL = [
+  { name: 'BlueFocus', icon: <Globe size={28} />, color: 'text-blue-600' },
+  { name: 'Publicis Groupe', icon: <Layers size={28} />, color: 'text-orange-600' },
+  { name: 'Dentsu', icon: <Zap size={28} />, color: 'text-yellow-500' },
+  { name: 'Hylink', icon: <Share2 size={28} />, color: 'text-indigo-600' },
+  { name: 'H&S', icon: <Building2 size={28} />, color: 'text-slate-700' },
+  { name: 'TechMahindra', icon: <Cpu size={28} />, color: 'text-red-600' },
 ];
 
 interface CaseDetail {
@@ -243,7 +255,7 @@ const testimonials = [
 
 // --- Components ---
 
-const CaseDetailModal: React.FC<{ c: CaseStudy; onClose: () => void }> = ({ c, onClose }) => {
+const CaseDetailModal: React.FC<{ c: CaseStudy; onClose: () => void; onSchedule: () => void }> = ({ c, onClose, onSchedule }) => {
   // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -362,7 +374,7 @@ const CaseDetailModal: React.FC<{ c: CaseStudy; onClose: () => void }> = ({ c, o
 
                 <div className="mt-12 pt-8 border-t border-slate-100 text-center">
                    <h4 className="font-bold text-slate-900 mb-4">准备好开启您的转型之旅了吗？</h4>
-                   <Button size="lg" onClick={onClose}>预约专家咨询</Button>
+                   <Button size="lg" onClick={onSchedule}>预约专家咨询</Button>
                 </div>
               </div>
            </div>
@@ -372,7 +384,7 @@ const CaseDetailModal: React.FC<{ c: CaseStudy; onClose: () => void }> = ({ c, o
   );
 };
 
-export const Cases: React.FC<{ onStart: () => void }> = ({ onStart }) => {
+export const Cases: React.FC<{ onStart: () => void; onSchedule: () => void }> = ({ onStart, onSchedule }) => {
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCase, setSelectedCase] = useState<CaseStudy | null>(null);
 
@@ -430,17 +442,19 @@ export const Cases: React.FC<{ onStart: () => void }> = ({ onStart }) => {
        </div>
 
        {/* 3. Logo Wall */}
-       <div className="py-16 overflow-hidden">
+       <div className="py-16 bg-white border-b border-slate-100">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-10">
                深受行业领军企业信赖
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-               {/* Simulated Text Logos for Demo */}
-               {['BlueFocus', 'Publicis Groupe', 'Dentsu', 'Hylink', 'H&S', 'TechMahindra'].map((logo, i) => (
-                  <span key={i} className="text-2xl md:text-3xl font-black text-slate-800 font-sans tracking-tighter hover:text-blue-600 cursor-default">
-                    {logo}
-                  </span>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-80 grayscale hover:grayscale-0 transition-all duration-500">
+               {LOGO_WALL.map((item, i) => (
+                  <div key={i} className="flex flex-col items-center gap-3 group cursor-default">
+                     <div className={`p-3 rounded-xl bg-slate-50 group-hover:bg-white group-hover:shadow-lg transition-all duration-300 ${item.color}`}>
+                        {item.icon}
+                     </div>
+                     <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{item.name}</span>
+                  </div>
                ))}
             </div>
          </div>
@@ -566,13 +580,13 @@ export const Cases: React.FC<{ onStart: () => void }> = ({ onStart }) => {
              
              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {testimonials.map((t, i) => (
-                   <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors duration-300">
+                   <div key={i} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-colors duration-300 flex flex-col h-full">
                       <Quote className="text-blue-400 mb-6 opacity-50" size={32} />
-                      <p className="text-lg text-slate-200 italic mb-8 leading-relaxed">
+                      <p className="text-lg text-slate-200 italic mb-8 leading-relaxed flex-1">
                         "{t.text}"
                       </p>
-                      <div className="flex items-center gap-4">
-                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      <div className="flex items-center gap-4 mt-auto">
+                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
                             {t.avatar}
                          </div>
                          <div>
@@ -597,10 +611,10 @@ export const Cases: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                       加入数千家领先企业的行列，体验企企云服务带来的管理变革。我们可以为您安排专属的行业顾问进行演示。
                    </p>
                    <div className="flex flex-col sm:flex-row justify-center gap-4">
-                      <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 border-none font-bold px-8 h-14 shadow-lg" onClick={onStart}>
+                      <Button size="lg" variant="inverse" className="px-8 h-14 font-bold" onClick={onStart}>
                          开启免费试用
                       </Button>
-                      <Button size="lg" variant="outline" className="text-white border-white/30 hover:bg-white/10 font-medium px-8 h-14">
+                      <Button size="lg" variant="glass" className="px-8 h-14 font-medium" onClick={onSchedule}>
                          预约专家演示
                       </Button>
                    </div>
@@ -611,7 +625,14 @@ export const Cases: React.FC<{ onStart: () => void }> = ({ onStart }) => {
 
        {/* Detail Modal */}
        {selectedCase && (
-          <CaseDetailModal c={selectedCase} onClose={() => setSelectedCase(null)} />
+          <CaseDetailModal 
+             c={selectedCase} 
+             onClose={() => setSelectedCase(null)} 
+             onSchedule={() => {
+                setSelectedCase(null);
+                onSchedule();
+             }}
+          />
        )}
     </div>
   );

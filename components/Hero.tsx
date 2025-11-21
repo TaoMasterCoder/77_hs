@@ -4,6 +4,7 @@ import { ChevronRight, Play, Zap } from 'lucide-react';
 
 interface HeroProps {
   onStart: () => void;
+  onSchedule: () => void;
 }
 
 const HERO_BG_IMAGES = [
@@ -45,7 +46,7 @@ const DASHBOARD_SCREENS = [
   }
 ];
 
-export const Hero: React.FC<HeroProps> = ({ onStart }) => {
+export const Hero: React.FC<HeroProps> = ({ onStart, onSchedule }) => {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [currentDashIndex, setCurrentDashIndex] = useState(0);
 
@@ -128,8 +129,9 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
           </Button>
           <Button 
             size="lg" 
-            variant="outline" 
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 px-8 h-14 text-lg backdrop-blur-sm"
+            variant="glass" 
+            className="px-8 h-14 text-lg"
+            onClick={onSchedule}
           >
             <Play size={18} className="mr-2 fill-white stroke-white" />
             预约专家演示

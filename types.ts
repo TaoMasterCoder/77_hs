@@ -29,6 +29,16 @@ export interface Transaction {
   status: 'success' | 'failed' | 'pending';
 }
 
+export interface Appointment {
+  id: string;
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  submittedAt: string;
+  status: 'pending' | 'contacted';
+}
+
 export interface UserState {
   balance: number; // Always stored in CNY (Base Currency)
   displayCurrency: Currency;
@@ -39,6 +49,7 @@ export interface UserState {
   tokensUsed: number;
   expiryDate: string | null;
   transactions: Transaction[];
+  appointments: Appointment[];
 }
 
 export interface ResourcePricing {

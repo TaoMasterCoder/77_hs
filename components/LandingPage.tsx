@@ -6,36 +6,69 @@ import {
   Layers, 
   Smartphone, 
   Globe, 
-  CheckCircle2, 
-  ShieldCheck, 
   Zap,
   LayoutGrid,
   PieChart,
-  Briefcase
+  Megaphone,
+  Feather,
+  Share2,
+  Building
 } from 'lucide-react';
 import { Button } from './Button';
 
 interface LandingPageProps {
   onStart: () => void;
+  onSchedule: () => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onSchedule }) => {
+  
+  const partners = [
+    { name: 'BlueFocus', label: '蓝色光标', icon: <Megaphone size={24} />, color: 'text-blue-500' },
+    { name: 'Ogilvy', label: '奥美集团', icon: <Feather size={24} />, color: 'text-red-500' },
+    { name: 'Hylink', label: '华扬联众', icon: <Share2 size={24} />, color: 'text-indigo-500' },
+    { name: 'Dentsu', label: '电通中国', icon: <Globe size={24} />, color: 'text-sky-500' },
+    { name: 'Publicis', label: '阳狮集团', icon: <Zap size={24} />, color: 'text-yellow-500' },
+    { name: 'WPP', label: 'WPP集团', icon: <LayoutGrid size={24} />, color: 'text-slate-600' }
+  ];
+
   return (
     <main className="bg-white">
-      <Hero onStart={onStart} />
+      <Hero onStart={onStart} onSchedule={onSchedule} />
       
-      {/* Section: Trusted By (Logo Cloud) */}
-      <section className="py-10 border-b border-slate-100 bg-slate-50/50">
+      {/* Section: Trusted By (Strategic Partners) */}
+      <section className="py-16 border-b border-slate-100 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-           <p className="text-center text-sm font-semibold text-slate-400 uppercase tracking-wider mb-8">
-             深受 5,000+ 创新型企业信赖
-           </p>
-           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              {['BlueFocus', 'Ogilvy', 'Hylink', 'Dentsu', 'Publicis', 'WPP'].map((name, i) => (
-                 <span key={i} className="text-xl md:text-2xl font-black text-slate-700 font-sans tracking-tighter hover:text-blue-600 cursor-default select-none">
-                    {name}
-                 </span>
+           <div className="text-center mb-10">
+             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-4">
+               <span className="h-px w-8 bg-slate-300"></span>
+               战略合作伙伴与行业客户
+               <span className="h-px w-8 bg-slate-300"></span>
+             </h3>
+           </div>
+           
+           {/* Logo Wall Grid */}
+           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {partners.map((client, i) => (
+                 <div key={i} className="group flex flex-col items-center justify-center p-6 rounded-xl border border-slate-100 bg-white hover:border-blue-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default relative overflow-hidden">
+                    <div className={`mb-3 ${client.color} bg-slate-50 p-3 rounded-full group-hover:bg-white group-hover:scale-110 transition-all duration-300`}>
+                       {client.icon}
+                    </div>
+                    <span className="text-lg font-black text-slate-700 font-sans tracking-tight group-hover:text-slate-900">
+                       {client.name}
+                    </span>
+                    <span className="text-xs text-slate-400 mt-1 font-medium opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2">
+                       {client.label}
+                    </span>
+                 </div>
               ))}
+           </div>
+           
+           <div className="mt-10 text-center">
+              <p className="text-xs text-slate-400 flex items-center justify-center gap-2">
+                 <Building size={12} />
+                 以上企业均已部署企企云服务作为核心业务管理系统
+              </p>
            </div>
         </div>
       </section>
@@ -78,23 +111,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                </div>
 
                {/* Tall Item: Mobile */}
-               <div className="md:row-span-2 bg-slate-900 rounded-3xl p-8 relative overflow-hidden group text-white hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300">
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-slate-800 to-slate-900 z-0"></div>
-                  <div className="relative z-10 h-full flex flex-col">
-                     <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white mb-4 group-hover:rotate-12 transition-transform">
-                        <Smartphone size={24} />
+               <div className="md:row-span-2 bg-slate-900 rounded-3xl p-0 relative overflow-hidden group text-white hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300">
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-slate-800 to-slate-950 z-0"></div>
+                  
+                  <div className="relative z-20 p-8 h-full flex flex-col">
+                     <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
+                           <Smartphone size={20} />
+                        </div>
+                        <span className="text-sm font-semibold text-blue-200 tracking-wider uppercase">Mobile First</span>
                      </div>
-                     <h3 className="text-2xl font-bold mb-2">移动端原生体验</h3>
-                     <p className="text-slate-400 mb-8">
-                        无论身在何处，业务审批、报销填报、数据查询触手可及。
+                     
+                     <h3 className="text-3xl font-bold mb-2 leading-tight">移动端<br/>原生体验</h3>
+                     <p className="text-slate-400 mb-8 text-sm leading-relaxed">
+                        打破时空限制。无论是审批、报表还是即时沟通，极致流畅的操作体验，让管理触手可及。
                      </p>
-                     <div className="mt-auto flex justify-center">
-                        <div className="w-[200px] h-[300px] bg-slate-800 rounded-t-3xl border-t-4 border-x-4 border-slate-700 relative transform translate-y-4 group-hover:translate-y-2 transition-transform">
-                           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-900 rounded-b-xl"></div>
-                           <div className="p-4 mt-6 space-y-3">
-                              <div className="h-20 bg-slate-700/50 rounded-lg w-full"></div>
-                              <div className="h-20 bg-slate-700/50 rounded-lg w-full"></div>
-                              <div className="h-20 bg-slate-700/50 rounded-lg w-full"></div>
+                     
+                     {/* Professional Mobile Image */}
+                     <div className="mt-auto relative w-full h-[320px] flex justify-center">
+                        <div className="relative w-[240px] transform transition-transform duration-500 group-hover:-translate-y-2">
+                           {/* Phone Frame Glow */}
+                           <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+                           
+                           {/* Phone Image */}
+                           <img 
+                              src="https://images.unsplash.com/photo-1551650992-ee4fd47df41f?q=80&w=800&auto=format&fit=crop" 
+                              alt="Mobile App Interface"
+                              className="relative z-10 w-full h-full object-cover rounded-t-3xl shadow-2xl border-4 border-slate-800 border-b-0 mask-image-gradient-to-b"
+                           />
+                           
+                           {/* Floating Element */}
+                           <div className="absolute -right-8 top-12 bg-white/10 backdrop-blur-xl border border-white/20 p-3 rounded-lg shadow-xl z-20 animate-bounce" style={{ animationDuration: '3s' }}>
+                              <div className="flex items-center gap-2">
+                                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                 <span className="text-xs font-medium">审批通过</span>
+                              </div>
                            </div>
                         </div>
                      </div>
@@ -102,96 +153,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                </div>
 
                {/* Standard Item: Smart Finance */}
-               <div className="bg-white rounded-3xl p-8 border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
-                     <PieChart size={24} />
+               <div className="bg-white rounded-3xl p-8 border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                     <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
+                        <PieChart size={24} />
+                     </div>
+                     <h3 className="text-xl font-bold text-slate-900 mb-2">业财一体化</h3>
+                     <p className="text-slate-500 text-sm">业务单据自动生成凭证，告别繁琐的手工录入。财务数据实时准确。</p>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">业财一体化</h3>
-                  <p className="text-slate-500 text-sm">业务单据自动生成凭证，告别繁琐的手工录入。财务数据实时准确。</p>
                </div>
 
                {/* Standard Item: BI */}
-               <div className="bg-white rounded-3xl p-8 border border-slate-200 hover:border-green-200 hover:shadow-lg transition-all duration-300 group">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform">
-                     <BarChart3 size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">智能 BI 决策</h3>
-                  <p className="text-slate-500 text-sm">预置多维度经营报表，现金流、利润率实时测算，辅助科学决策。</p>
-               </div>
-            </div>
-         </div>
-      </section>
-
-      {/* Section: Solution / Tech Feel */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-         {/* Background Effects */}
-         <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-900/20 blur-[120px] pointer-events-none"></div>
-         <div className="absolute bottom-0 left-0 w-1/2 h-full bg-indigo-900/20 blur-[120px] pointer-events-none"></div>
-
-         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center gap-16">
-               <div className="lg:w-1/2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-300 text-xs font-bold mb-6">
-                     <Zap size={12} /> 核心技术架构
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                     打破传统 ERP 的<br />
-                     <span className="text-blue-400">僵化与边界</span>
-                  </h2>
-                  <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                     企企云服务采用最新的云原生微服务架构。不同于传统软件的"大单体"，我们支持按需配置、弹性扩展与秒级迭代。
-                  </p>
-                  
-                  <div className="space-y-6">
-                     {[
-                        { title: "OpenAPI 开放平台", desc: "轻松连接 CRM、OA、HR 等第三方系统，消除数据孤岛。" },
-                        { title: "低代码配置引擎", desc: "无需开发人员，业务部门即可拖拽生成表单与审批流。" },
-                        { title: "企业级安全合规", desc: "等保三级认证，全链路数据加密，每日自动容灾备份。" }
-                     ].map((item, i) => (
-                        <div key={i} className="flex gap-4">
-                           <div className="mt-1 w-6 h-6 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 border border-blue-500/30">
-                              <CheckCircle2 size={14} />
-                           </div>
-                           <div>
-                              <h4 className="text-white font-bold">{item.title}</h4>
-                              <p className="text-slate-500 text-sm mt-1">{item.desc}</p>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-               
-               <div className="lg:w-1/2 w-full">
-                  <div className="relative">
-                     {/* Abstract Tech Visualization */}
-                     <div className="aspect-square bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-6 relative overflow-hidden shadow-2xl">
-                        <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 gap-1 opacity-10">
-                           {Array.from({ length: 36 }).map((_, i) => (
-                              <div key={i} className="bg-white/20 rounded-sm"></div>
-                           ))}
-                        </div>
-                        
-                        {/* Central Hub */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-slate-900 rounded-full border-2 border-blue-500 flex items-center justify-center z-10 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
-                           <LayoutGrid className="text-blue-400" size={40} />
-                        </div>
-
-                        {/* Orbiting Nodes */}
-                        {[0, 72, 144, 216, 288].map((deg, i) => (
-                           <div key={i} className="absolute top-1/2 left-1/2 w-full h-1 bg-transparent" style={{ transform: `translate(-50%, -50%) rotate(${deg}deg)` }}>
-                              <div className="absolute right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-slate-800 border border-slate-600 rounded-xl flex items-center justify-center text-white z-10 shadow-lg animate-bounce" style={{ animationDelay: `${i * 0.5}s` }}>
-                                 {i === 0 && <Briefcase size={20} className="text-purple-400" />}
-                                 {i === 1 && <PieChart size={20} className="text-green-400" />}
-                                 {i === 2 && <Smartphone size={20} className="text-orange-400" />}
-                                 {i === 3 && <Globe size={20} className="text-cyan-400" />}
-                                 {i === 4 && <ShieldCheck size={20} className="text-red-400" />}
-                              </div>
-                              {/* Connecting Line */}
-                              <div className="absolute right-20 top-1/2 left-1/2 h-[1px] bg-gradient-to-r from-blue-500/50 to-transparent"></div>
-                           </div>
-                        ))}
+               <div className="bg-white rounded-3xl p-8 border border-slate-200 hover:border-green-200 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                  <div className="relative z-10">
+                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform">
+                        <BarChart3 size={24} />
                      </div>
+                     <h3 className="text-xl font-bold text-slate-900 mb-2">智能 BI 决策</h3>
+                     <p className="text-slate-500 text-sm">预置多维度经营报表，现金流、利润率实时测算，辅助科学决策。</p>
                   </div>
                </div>
             </div>
@@ -216,7 +197,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                <Button size="lg" className="bg-slate-900 text-white hover:bg-slate-800 h-14 px-10 text-lg shadow-xl" onClick={onStart}>
                   立即免费试用
                </Button>
-               <Button size="lg" variant="outline" className="h-14 px-10 text-lg">
+               <Button size="lg" variant="outline" className="h-14 px-10 text-lg" onClick={onSchedule}>
                   联系销售顾问
                </Button>
             </div>
