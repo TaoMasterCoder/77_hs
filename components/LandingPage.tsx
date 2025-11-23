@@ -74,7 +74,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, onSchedule })
       </section>
 
       {/* Section: Bento Grid Features */}
-      <section className="py-24">
+      <section className="py-24" id="tour-features">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
                <h2 className="text-blue-600 font-semibold tracking-wide uppercase mb-2">全场景覆盖</h2>

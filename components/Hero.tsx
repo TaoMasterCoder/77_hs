@@ -101,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ onStart, onSchedule }) => {
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-8 leading-tight animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 drop-shadow-lg">
+        <h1 id="tour-hero" className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-8 leading-tight animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 drop-shadow-lg">
           重塑 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">业财一体化</span>
           <br />
           <span className="relative">

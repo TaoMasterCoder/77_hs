@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   PieChart, 
   Briefcase, 
@@ -22,8 +22,37 @@ interface FeatureBlockProps {
 }
 
 const FeatureBlock: React.FC<FeatureBlockProps> = ({ title, description, icon, points, isReversed, colorClass, imageSrc }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            if (domRef.current) observer.unobserve(domRef.current);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const { current } = domRef;
+    if (current) observer.observe(current);
+
+    return () => {
+      if (current) observer.unobserve(current);
+    };
+  }, []);
+
   return (
-    <div className={`flex flex-col md:flex-row items-center gap-12 py-16 ${isReversed ? 'md:flex-row-reverse' : ''}`}>
+    <div 
+      ref={domRef}
+      className={`flex flex-col md:flex-row items-center gap-12 py-16 transition-all duration-1000 ease-out transform ${
+        isReversed ? 'md:flex-row-reverse' : ''
+      } ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+    >
       <div className="flex-1">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${colorClass}`}>
           {icon}

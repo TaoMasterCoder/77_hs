@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, 
@@ -21,7 +22,14 @@ import {
   Phone,
   Mail,
   Briefcase,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2,
+  QrCode,
+  Smartphone,
+  HardDrive,
+  TrendingUp,
+  Download,
+  Filter
 } from 'lucide-react';
 import { UserState, PlanType, Transaction, Currency } from '../types';
 import { RESOURCE_PRICING, EXCHANGE_RATE_USD_TO_CNY } from '../constants';
@@ -35,11 +43,15 @@ interface DashboardProps {
   setUserState: React.Dispatch<React.SetStateAction<UserState>>;
 }
 
+type PaymentMethod = 'alipay' | 'wechat' | 'paypal';
+
 export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState }) => {
   const [view, setView] = useState<'overview' | 'subscribe' | 'resources' | 'history' | 'help' | 'appointments'>('overview');
   const [rechargeAmount, setRechargeAmount] = useState<number | ''>('');
   const [rechargeCurrency, setRechargeCurrency] = useState<Currency>('CNY');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('alipay');
   const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error' | 'warning'} | null>(null);
   
   // Auto-dismiss toast
@@ -123,26 +135,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
     const amount = typeof rechargeAmount === 'number' ? rechargeAmount : 0;
     if (amount <= 0) return;
     
-    const exchangeRate = rechargeCurrency === 'CNY' ? 1 : EXCHANGE_RATE_USD_TO_CNY;
-    const baseAmountToAdd = rechargeCurrency === 'CNY' ? amount : amount * exchangeRate;
+    setIsProcessingPayment(true);
 
-    const tx = addTransaction(
-      amount, 
-      `账户余额充值 (${rechargeCurrency})`, 
-      'recharge', 
-      rechargeCurrency, 
-      exchangeRate
-    );
+    // Simulate network delay
+    setTimeout(() => {
+      const exchangeRate = rechargeCurrency === 'CNY' ? 1 : EXCHANGE_RATE_USD_TO_CNY;
+      const baseAmountToAdd = rechargeCurrency === 'CNY' ? amount : amount * exchangeRate;
 
-    setUserState(prev => ({
-      ...prev,
-      balance: prev.balance + baseAmountToAdd,
-      transactions: [tx, ...prev.transactions]
-    }));
-    setRechargeAmount('');
-    setRechargeCurrency('CNY'); // Reset to default
-    setShowRechargeModal(false);
-    setToast({ message: `成功充值 ${rechargeCurrency === 'CNY' ? '¥' : '$'}${amount}`, type: 'success' });
+      let methodLabel = '未知';
+      if (paymentMethod === 'alipay') methodLabel = '支付宝';
+      if (paymentMethod === 'wechat') methodLabel = '微信支付';
+      if (paymentMethod === 'paypal') methodLabel = 'PayPal';
+
+      const tx = addTransaction(
+        amount, 
+        `账户余额充值 (${rechargeCurrency}) - ${methodLabel}`, 
+        'recharge', 
+        rechargeCurrency, 
+        exchangeRate
+      );
+
+      setUserState(prev => ({
+        ...prev,
+        balance: prev.balance + baseAmountToAdd,
+        transactions: [tx, ...prev.transactions]
+      }));
+      setRechargeAmount('');
+      setRechargeCurrency('CNY'); // Reset to default
+      setShowRechargeModal(false);
+      setIsProcessingPayment(false);
+      setToast({ message: `充值成功！已通过${methodLabel}存入 ${rechargeCurrency === 'CNY' ? '¥' : '$'}${amount}`, type: 'success' });
+    }, 2000);
   };
 
   const handleSubscribe = (users: number, costCNY: number) => {
@@ -176,7 +199,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
   const handleBuyStorage = () => {
     const costCNY = RESOURCE_PRICING.storagePerGBMonth * 12 * 10; // Buy 10GB for a year
     if (userState.balance < costCNY) {
-      alert("余额不足");
+      alert("余额不足，请先充值");
+      setShowRechargeModal(true);
       return;
     }
 
@@ -188,25 +212,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
       storageGB: prev.storageGB + 10,
       transactions: [tx, ...prev.transactions]
     }));
-    setToast({ message: "扩容成功！增加 10GB 存储。", type: 'success' });
+    setToast({ message: "扩容成功！已增加 10GB 存储空间。", type: 'success' });
   };
 
   const handleBuyTokens = () => {
     const costCNY = RESOURCE_PRICING.tokensPerMillion; // Buy 1M tokens
     if (userState.balance < costCNY) {
-      alert("余额不足");
+      alert("余额不足，请先充值");
+      setShowRechargeModal(true);
       return;
     }
 
-    const tx = addTransaction(-costCNY, '购买AI Token额度 (100万)', 'resource');
+    const tx = addTransaction(-costCNY, '购买AI Token资源包 (100万)', 'resource');
 
     setUserState(prev => ({
       ...prev,
       balance: prev.balance - costCNY,
-      tokensUsed: prev.tokensUsed, // Logic placeholder
+      tokensUsed: prev.tokensUsed + 1000000, // Treat tokensUsed as 'Tokens Available' for display logic in this demo
       transactions: [tx, ...prev.transactions]
     }));
-    setToast({ message: `已购买 100万 Token 额度，扣除 ¥${costCNY}`, type: 'success' });
+    setToast({ message: `购买成功！已增加 100万 Token 额度。`, type: 'success' });
   };
 
   const toggleCurrency = () => {
@@ -340,7 +365,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
             
             {/* View: Overview */}
             {view === 'overview' && (
-              <div className="space-y-6">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                 <h2 className="text-2xl font-bold text-slate-900">概览</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -430,8 +455,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-sm font-medium text-slate-500">AI Token 使用量</p>
-                        <h3 className="text-xl font-bold text-slate-900 mt-1">245 K</h3>
+                        <p className="text-sm font-medium text-slate-500">可用 AI Token 额度</p>
+                        <h3 className="text-xl font-bold text-slate-900 mt-1">{userState.tokensUsed.toLocaleString()}</h3>
                       </div>
                       <div className="p-2 rounded-lg bg-yellow-100 text-yellow-600">
                         <Zap size={20} />
@@ -482,9 +507,219 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
               </div>
             )}
 
+            {/* View: Subscribe */}
+            {view === 'subscribe' && (
+               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <h2 className="text-2xl font-bold text-slate-900">订阅管理</h2>
+                  
+                  {/* Current Plan Status */}
+                  <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg">
+                     <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                           <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-xl font-bold text-slate-200">当前方案</h3>
+                              {userState.isSubscribed && (
+                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded border border-green-500/30">
+                                    生效中
+                                 </span>
+                              )}
+                           </div>
+                           <div className="text-3xl font-bold mb-1">
+                              {userState.isSubscribed 
+                                 ? (userState.activePlan === PlanType.PROFESSIONAL ? '专业版 (Professional)' : '标准版 (Standard)')
+                                 : '免费试用版'}
+                           </div>
+                           <p className="text-slate-400 text-sm">
+                              {userState.isSubscribed 
+                                 ? `包含 ${userState.userCount} 个用户授权`
+                                 : '仅限 5 人以下团队试用'}
+                           </p>
+                        </div>
+                        {userState.isSubscribed && (
+                           <div className="text-left md:text-right bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                              <div className="text-xs text-slate-400 mb-1">服务到期时间</div>
+                              <div className="text-xl font-mono font-bold">{userState.expiryDate}</div>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+
+                  {/* Calculator / Upgrade */}
+                  <div className="mt-8">
+                     <h3 className="text-lg font-bold text-slate-900 mb-4">变更订阅 / 续费</h3>
+                     <PricingCalculator 
+                        showSubscribeButton 
+                        onSubscribe={handleSubscribe} 
+                        currency={userState.displayCurrency}
+                        exchangeRate={EXCHANGE_RATE_USD_TO_CNY}
+                     />
+                  </div>
+               </div>
+            )}
+
+            {/* View: Resources */}
+            {view === 'resources' && (
+               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <h2 className="text-2xl font-bold text-slate-900">资源用量</h2>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                     {/* Storage Section */}
+                     <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                        <div className="flex justify-between items-start mb-6">
+                           <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                 <HardDrive className="text-purple-600" size={20} />
+                                 <h3 className="font-bold text-lg text-slate-900">云存储空间</h3>
+                              </div>
+                              <p className="text-slate-500 text-sm">用于存储项目文档、设计图纸与备份数据</p>
+                           </div>
+                           <div className="text-right">
+                              <div className="text-2xl font-bold text-slate-900">{userState.storageGB} GB</div>
+                              <div className="text-xs text-slate-500">总容量</div>
+                           </div>
+                        </div>
+
+                        <div className="bg-slate-100 rounded-full h-4 w-full mb-2 overflow-hidden">
+                           <div className="bg-purple-600 h-full rounded-full" style={{ width: '45%' }}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-500 mb-8">
+                           <span>已使用 45%</span>
+                           <span>剩余 {Math.floor(userState.storageGB * 0.55)} GB</span>
+                        </div>
+
+                        <div className="mt-auto bg-slate-50 rounded-xl p-6 border border-slate-100">
+                           <div className="flex justify-between items-center mb-4">
+                              <span className="font-bold text-slate-700">扩容包 (10GB)</span>
+                              <span className="text-purple-600 font-bold">{formatMoney(RESOURCE_PRICING.storagePerGBMonth * 120)}/年</span>
+                           </div>
+                           <Button onClick={handleBuyStorage} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                              购买扩容包
+                           </Button>
+                           <p className="text-center text-xs text-slate-400 mt-2">即时生效，费用从余额扣除</p>
+                        </div>
+                     </div>
+
+                     {/* Tokens Section */}
+                     <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                        <div className="flex justify-between items-start mb-6">
+                           <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                 <Zap className="text-yellow-500" size={20} />
+                                 <h3 className="font-bold text-lg text-slate-900">AI 智能算力</h3>
+                              </div>
+                              <p className="text-slate-500 text-sm">用于智能助手、数据分析与自动化报表生成</p>
+                           </div>
+                           <div className="text-right">
+                              <div className="text-2xl font-bold text-slate-900">{userState.tokensUsed.toLocaleString()}</div>
+                              <div className="text-xs text-slate-500">可用 Token</div>
+                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 mb-8">
+                           <div className="bg-slate-50 p-3 rounded-lg text-center">
+                              <div className="text-xs text-slate-400 mb-1">昨日消耗</div>
+                              <div className="font-bold text-slate-700">12.5k</div>
+                           </div>
+                           <div className="bg-slate-50 p-3 rounded-lg text-center">
+                              <div className="text-xs text-slate-400 mb-1">本月消耗</div>
+                              <div className="font-bold text-slate-700">340k</div>
+                           </div>
+                           <div className="bg-slate-50 p-3 rounded-lg text-center">
+                              <div className="text-xs text-slate-400 mb-1">预估可用天数</div>
+                              <div className="font-bold text-slate-700">28天</div>
+                           </div>
+                        </div>
+
+                        <div className="mt-auto bg-slate-50 rounded-xl p-6 border border-slate-100">
+                           <div className="flex justify-between items-center mb-4">
+                              <span className="font-bold text-slate-700">流量包 (100万 Token)</span>
+                              <span className="text-yellow-600 font-bold">{formatMoney(RESOURCE_PRICING.tokensPerMillion)}/次</span>
+                           </div>
+                           <Button onClick={handleBuyTokens} className="w-full bg-yellow-500 hover:bg-yellow-600 text-white">
+                              购买流量包
+                           </Button>
+                           <p className="text-center text-xs text-slate-400 mt-2">永不过期，按量扣除</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            )}
+
+            {/* View: History */}
+            {view === 'history' && (
+               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <div className="flex justify-between items-center">
+                     <h2 className="text-2xl font-bold text-slate-900">交易记录</h2>
+                     <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="gap-2 text-slate-500">
+                           <Filter size={14} /> 筛选
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-2 text-slate-500">
+                           <Download size={14} /> 导出账单
+                        </Button>
+                     </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                     <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm text-slate-600">
+                           <thead className="bg-slate-50 text-slate-900 font-medium border-b border-slate-200">
+                              <tr>
+                                 <th className="px-6 py-4">交易时间</th>
+                                 <th className="px-6 py-4">交易单号</th>
+                                 <th className="px-6 py-4">类型</th>
+                                 <th className="px-6 py-4">描述</th>
+                                 <th className="px-6 py-4 text-right">金额</th>
+                                 <th className="px-6 py-4 text-center">状态</th>
+                              </tr>
+                           </thead>
+                           <tbody className="divide-y divide-slate-100">
+                              {userState.transactions.map((tx) => (
+                                 <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                                       {new Date(tx.date).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 font-mono text-xs text-slate-400 select-all">
+                                       {tx.id.toUpperCase()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                                          tx.type === 'recharge' ? 'bg-green-100 text-green-800' :
+                                          tx.type === 'subscription' ? 'bg-blue-100 text-blue-800' :
+                                          'bg-slate-100 text-slate-800'
+                                       }`}>
+                                          {tx.type === 'recharge' ? '充值' : tx.type === 'subscription' ? '订阅' : '资源消费'}
+                                       </span>
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-slate-900">
+                                       {tx.description}
+                                    </td>
+                                    <td className={`px-6 py-4 text-right font-bold font-mono ${tx.amount > 0 ? 'text-green-600' : 'text-slate-900'}`}>
+                                       {tx.amount > 0 ? '+' : ''}
+                                       {tx.currency === 'USD' ? '$' : '¥'}
+                                       {Math.abs(tx.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                       <span className="inline-flex items-center gap-1 text-green-600 text-xs font-medium">
+                                          <CheckCircle2 size={14} /> 成功
+                                       </span>
+                                    </td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+                     {userState.transactions.length === 0 && (
+                        <div className="p-12 text-center text-slate-400">暂无交易数据</div>
+                     )}
+                  </div>
+               </div>
+            )}
+
             {/* View: Appointments */}
             {view === 'appointments' && (
-              <div className="space-y-6">
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                  <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-slate-900">预约管理</h2>
                     <div className="flex gap-2">
@@ -589,28 +824,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
 
       {/* Recharge Modal */}
       {showRechargeModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all animate-in zoom-in-95 duration-200">
              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                   <Wallet className="text-blue-600" /> 账户充值
                 </h3>
-                <button onClick={() => setShowRechargeModal(false)} className="text-slate-400 hover:text-slate-600">
-                  <X size={24} />
-                </button>
+                {!isProcessingPayment && (
+                  <button onClick={() => setShowRechargeModal(false)} className="text-slate-400 hover:text-slate-600">
+                    <X size={24} />
+                  </button>
+                )}
              </div>
              
-             <div className="space-y-4">
+             <div className="space-y-5">
                {/* Currency Selector */}
                <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
                  <button 
                    onClick={() => setRechargeCurrency('CNY')}
+                   disabled={isProcessingPayment}
                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${rechargeCurrency === 'CNY' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                  >
                    CNY (¥)
                  </button>
                  <button 
                    onClick={() => setRechargeCurrency('USD')}
+                   disabled={isProcessingPayment}
                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${rechargeCurrency === 'USD' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                  >
                    USD ($)
@@ -630,7 +869,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
                       value={rechargeAmount}
                       onChange={(e) => setRechargeAmount(parseInt(e.target.value) || '')}
                       placeholder="请输入金额"
-                      className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold text-slate-900"
+                      disabled={isProcessingPayment}
+                      className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold text-slate-900 disabled:bg-slate-50 disabled:text-slate-400"
                     />
                  </div>
                  {rechargeCurrency === 'USD' && typeof rechargeAmount === 'number' && rechargeAmount > 0 && (
@@ -645,20 +885,86 @@ export const Dashboard: React.FC<DashboardProps> = ({ userState, setUserState })
                     <button 
                       key={amt}
                       onClick={() => setRechargeAmount(amt)}
-                      className="border border-slate-200 hover:border-blue-500 hover:bg-blue-50 py-2 rounded-lg text-sm font-medium text-slate-600 transition-colors"
+                      disabled={isProcessingPayment}
+                      className="border border-slate-200 hover:border-blue-500 hover:bg-blue-50 py-2 rounded-lg text-sm font-medium text-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                        {rechargeCurrency === 'CNY' ? '¥' : '$'}{amt}
                     </button>
                   ))}
                </div>
 
-               <div className="bg-slate-50 p-4 rounded-lg text-sm text-slate-500">
-                 <p>· 充值金额将按实时汇率转换为 CNY 存入。</p>
-                 <p>· 可用于支付订阅费、存储扩展及API调用。</p>
+               {/* Payment Method Selector */}
+               <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                    选择支付方式
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                     <button
+                       onClick={() => setPaymentMethod('alipay')}
+                       disabled={isProcessingPayment}
+                       className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                         paymentMethod === 'alipay' 
+                         ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' 
+                         : 'border-slate-200 hover:border-blue-300 text-slate-600 hover:bg-slate-50'
+                       } ${isProcessingPayment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                        <div className={`mb-1.5 p-1.5 rounded-full ${paymentMethod === 'alipay' ? 'bg-blue-200' : 'bg-slate-100'}`}>
+                           <Smartphone size={20} className={paymentMethod === 'alipay' ? 'text-blue-700' : 'text-slate-500'} />
+                        </div>
+                        <span className="text-xs font-bold">支付宝</span>
+                     </button>
+
+                     <button
+                       onClick={() => setPaymentMethod('wechat')}
+                       disabled={isProcessingPayment}
+                       className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                         paymentMethod === 'wechat' 
+                         ? 'border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500' 
+                         : 'border-slate-200 hover:border-green-300 text-slate-600 hover:bg-slate-50'
+                       } ${isProcessingPayment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                        <div className={`mb-1.5 p-1.5 rounded-full ${paymentMethod === 'wechat' ? 'bg-green-200' : 'bg-slate-100'}`}>
+                           <QrCode size={20} className={paymentMethod === 'wechat' ? 'text-green-700' : 'text-slate-500'} />
+                        </div>
+                        <span className="text-xs font-bold">微信支付</span>
+                     </button>
+
+                     <button
+                       onClick={() => setPaymentMethod('paypal')}
+                       disabled={isProcessingPayment}
+                       className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                         paymentMethod === 'paypal' 
+                         ? 'border-indigo-500 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500' 
+                         : 'border-slate-200 hover:border-indigo-300 text-slate-600 hover:bg-slate-50'
+                       } ${isProcessingPayment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                        <div className={`mb-1.5 p-1.5 rounded-full ${paymentMethod === 'paypal' ? 'bg-indigo-200' : 'bg-slate-100'}`}>
+                           <CreditCard size={20} className={paymentMethod === 'paypal' ? 'text-indigo-700' : 'text-slate-500'} />
+                        </div>
+                        <span className="text-xs font-bold">PayPal</span>
+                     </button>
+                  </div>
                </div>
 
-               <Button className="w-full" size="lg" onClick={handleRecharge} disabled={!rechargeAmount || Number(rechargeAmount) <= 0}>
-                 确认支付
+               <div className="bg-slate-50 p-4 rounded-lg text-xs text-slate-500">
+                 <p className="mb-1">· 充值金额将按实时汇率转换为 CNY 存入账户余额。</p>
+                 <p>· 支付成功后，余额更新可能存在 1-2 秒延迟。</p>
+               </div>
+
+               <Button 
+                  className="w-full flex items-center justify-center gap-2" 
+                  size="lg" 
+                  onClick={handleRecharge} 
+                  disabled={!rechargeAmount || Number(rechargeAmount) <= 0 || isProcessingPayment}
+                >
+                 {isProcessingPayment ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      正在连接支付网关...
+                    </>
+                 ) : (
+                    '确认支付'
+                 )}
                </Button>
              </div>
           </div>

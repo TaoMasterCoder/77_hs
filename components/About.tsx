@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, Lightbulb, Users, Award, MapPin, Briefcase, Rocket, Heart } from 'lucide-react';
+import { Target, Lightbulb, Users, Award, MapPin, Briefcase, Rocket, Heart, Cloud } from 'lucide-react';
 
 export const About: React.FC = () => {
   return (
@@ -25,7 +25,10 @@ export const About: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row gap-16 items-start">
             <div className="md:w-1/3">
-              <h2 className="text-3xl font-bold text-slate-900 relative pb-4 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-12 after:h-1 after:bg-blue-600">
+              <h2 className="text-3xl font-bold text-slate-900 relative pb-4 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-12 after:h-1 after:bg-blue-600 flex items-center gap-3">
+                <span className="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                  <Cloud size={24} fill="currentColor" />
+                </span>
                 关于企企云
               </h2>
               <p className="mt-6 text-slate-500 font-medium text-lg">

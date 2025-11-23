@@ -23,11 +23,15 @@ const Facebook = ({ size = 18, className = "" }: { size?: number, className?: st
 
 interface FooterProps {
   onNavigate?: (page: PageType) => void;
+  isDarkMode: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, isDarkMode }) => {
+  // Use slightly darker background for dark mode to differentiate from main content
+  const bgClass = isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-900 border-slate-800';
+
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800 font-sans">
+    <footer className={`${bgClass} text-slate-300 pt-16 pb-8 border-t font-sans transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Top Section: Links & Info */}
